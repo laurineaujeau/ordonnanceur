@@ -1,0 +1,11 @@
+### requete1
+POST http://localhost:3000/login
+Accept: application/json
+Content-Type: application/json
+
+{
+"login":"Laurine",
+"password":"0000"
+}
+
+###

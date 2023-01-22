@@ -1,0 +1,179 @@
+doctype html
+html(lang='en')
+    head
+        title= title
+        meta(charset='utf-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous")
+        script(type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js")
+        script(nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js")
+    body
+        div.container-fluid
+            nav.navbar.navbar-light.bg-light.justify-content-between
+                div
+                    span.navbar-brand.mb-0.h1 MonOrdonnanceur
+
+                form(method='POST' action="/findUser")
+                    div.form-inline
+                        input#rechercheUtilisateur.form-control(type='text' name='rechercheUtilisateur' required='true' placeholder="Rechercher un utilisateur ..." )
+                        button.btn.btn-primary(type="submit") Rechercher
+                div
+                    if user
+                        if user.role === "administrateur"
+                            form.form-inline(method='POST' action="/logout")
+                                span.mr-3 Administrateur : #{user.name}
+                                button.btn.btn-primary(type="submit") Déconnexion
+                        else
+                            form.form-inline(method='POST' action="/logout")
+                                span.mr-3 #{user.name}
+                                button.btn.btn-primary(type="submit") Déconnexion
+                    else
+                        span.mr-3 Utilisateur non identifié
+
+            h1#h1.my-3= title
+            if message
+                if type === "success"
+                    div.alert.alert-success= message
+                else if type === "error"
+                    div.alert.alert-danger= message
+            block content
+                div.row
+                    div.col.col-md-auto.text-center
+                        if user.role === "administrateur"
+                            form(method='GET' role='form' action="/newRessource")
+                                button.btn.btn-primary.my-3(type="submit") Nouvelle Ressource
+                        div.card.m-3
+                            div.card-header.text-center.font-weight-bold(style="background-color:#b8daff") Ressources proposées
+                            div.card-body
+                                ul#liste-ressources.list-group.list-group-flush
+                                    each ressource in ressources
+                                        li.list-group-item.text-center= ressource
+                    div#conteneur-calendrier.col
+                        - var reservationContientJourN = function(reservation, ressource, n){
+                        -       var dateDebutStr = reservation.dateDebut.split(" ")[0].split("/").reverse().join("-")+"T"+reservation.dateDebut.split(" ")[1]+":00";
+                        -       var dateFinStr = reservation.dateFin.split(" ")[0].split("/").reverse().join("-")+"T"+reservation.dateFin.split(" ")[1]+":00";
+                        -       var dateDebutJourStr = annee+"-"+((nbMois<10)?"0"+nbMois:nbMois)+"-"+((n<10)?"0"+n:n)+"T00:00:00";
+                        -       var dateFinJourStr = annee+"-"+((nbMois<10)?"0"+nbMois:nbMois)+"-"+((n<10)?"0"+n:n)+"T23:59:59";
+                        -       var dateDebut = Date.parse(dateDebutStr);
+                        -       var dateFin = Date.parse(dateFinStr);
+                        -       var dateDebutJour = Date.parse(dateDebutJourStr);
+                        -       var dateFinJour = Date.parse(dateFinJourStr);
+                        -       return !((dateFin < dateDebutJour) || (dateDebut > dateFinJour)) && reservation.ressource === ressource
+                        -  }
+                        - var nbRessourcesReservees = 0;
+                        div#conteneur-bouton.text-center
+                            form(method='GET' role='form' action="/newReservation")
+                                button.btn.btn-primary.my-3(type="submit") Nouvelle Réservation
+                        div#calendrier
+                            div#entete-calendrier.table-primary.border.border-primary(style="margin-left:0px; margin-right:0px;")
+                                div.row.py-1
+                                    div.col.col-sm
+                                        form(method='POST' role='form' action="/previousMonth")
+                                            button#moisPrecedent.btn.table-primary.font-weight-bold(type="submit") <
+                                    div.text-center.col.col-md(style="padding-top:0.5%")
+                                        h5=mois + " " + annee
+                                    div.col.col-sm.text-right
+                                        form(method='POST' role='form' action="/nextMonth")
+                                            button#moisSuivant.btn.table-primary.font-weight-bold(type="submit") >
+                            div#body-calendrier
+                                table.table.table-bordered.table-sm
+                                    thead.table-primary
+                                        - var n= 1;
+                                        tr
+                                            th Ressources
+                                            while n <= nbJours
+                                                th
+                                                    a(href="?jour="+n)=n++
+                                    tbody
+                                    // indexOf permet d'avoir l'index de la première fois ou il rencontre la ressource
+                                    each ressource in reservations.map(reservation => reservation.ressource).filter((ressource, index, self) => self.indexOf(ressource) === index)
+                                        - nbRessourcesReservees ++;
+                                        tr
+                                            td=ressource
+
+
+                                            - var n=1;
+
+                                            while n<= nbJours
+                                                - var reservationsDuJourCourant = reservations.filter(reservation => reservationContientJourN(reservation, ressource, n));
+                                                - var nbMinutesJour = 0;
+
+                                                - for (let reservation of reservationsDuJourCourant){
+                                                -       var dateDebutStr = reservation.dateDebut.split(" ")[0].split("/").reverse().join("-")+"T"+reservation.dateDebut.split(" ")[1]+":00";
+                                                -       var dateFinStr = reservation.dateFin.split(" ")[0].split("/").reverse().join("-")+"T"+reservation.dateFin.split(" ")[1]+":00";
+                                                -       var dateDebutJourStr = annee+"-"+((nbMois<10)?"0"+nbMois:nbMois)+"-"+((n<10)?"0"+n:n)+"T00:00:00";
+                                                -       var dateFinJourStr = annee+"-"+((nbMois<10)?"0"+nbMois:nbMois)+"-"+((n<10)?"0"+n:n)+"T23:59:59";
+                                                -       var dateDebut = Date.parse(dateDebutStr);
+                                                -       var dateFin = Date.parse(dateFinStr);
+                                                -       var dateDebutJour = Date.parse(dateDebutJourStr);
+                                                -       var dateFinJour = Date.parse(dateFinJourStr);
+                                                -       if(dateDebutJour <= dateDebut && dateFinJour >= dateFin){
+                                                -              nbMinutesJour += Math.ceil((dateFin-dateDebut)/60000);
+                                                -       }
+                                                -       else if(dateDebutJour <= dateDebut && dateFinJour < dateFin && dateFinJour > dateDebut){
+                                                -              nbMinutesJour += Math.ceil((dateFinJour-dateDebut)/60000);
+                                                -       }
+                                                -       else if(dateDebutJour > dateDebut && dateFinJour >= dateFin && dateDebutJour < dateFin){
+                                                -              nbMinutesJour += Math.ceil((dateFin-dateDebutJour)/60000);
+                                                -       }
+                                                -       else if(dateDebutJour > dateDebut && dateFinJour < dateFin){
+                                                -              nbMinutesJour += Math.ceil((dateFinJour-dateDebutJour)/60000);
+                                                -       }
+                                                - }
+                                                - n++;
+                                                if(nbMinutesJour === 1440)
+                                                    td.bg-danger
+                                                        a(href="?jour="+n+"&ressource="+ressource)
+                                                else if(nbMinutesJour < 1440  && nbMinutesJour > 0)
+                                                    td.bg-warning
+                                                        a(href="?jour="+n+"&ressource="+ressource)
+                                                else
+                                                    td
+                                                        a(href="?jour="+n+"&ressource="+ressource)
+
+                        if(reservationsDuJour)
+                            div#planning-jour(style="display:inline-block;height:30rem;overflow-y:scroll;width:100%;")
+                                table.table.table-bordered.table-sm
+                                    thead.table-primary(style="z-index:1000;position:relative;")
+                                        tr.table-primary(style="position:sticky;top:0;")
+                                            th.text-center(colspan=nbRessourcesReservees + 1)= jourClique + " " + mois + " " + annee
+                                        tr.table-primary(style="position:sticky;top:2.19rem")
+                                            th.text-center Horaire
+                                            each ressource in reservations.map(reservation => reservation.ressource).filter((ressource, index, self) => self.indexOf(ressource) === index)
+                                                th.text-center=ressource
+
+                                    tbody
+                                        - var n= 0;
+                                        while n < 24
+                                            tr
+                                                td.font-weight-bold.col-1(rowspan=61)=n + "h00"
+
+                                            - var m = 0
+                                            while m < 60
+                                                tr
+                                                    each ressource in reservations.map(reservation => reservation.ressource).filter((ressource, index, self) => self.indexOf(ressource) === index)
+                                                        - var ressourceReservee = false;
+                                                        - for (let reservation of reservationsDuJour.filter(reservation => reservation.ressource === ressource)){
+                                                        -       var dateDebutStr = reservation.dateDebut.split(" ")[0].split("/").reverse().join("-")+"T"+reservation.dateDebut.split(" ")[1]+":00";
+                                                        -       var dateFinStr = reservation.dateFin.split(" ")[0].split("/").reverse().join("-")+"T"+reservation.dateFin.split(" ")[1]+":00";
+                                                        -       var dateDebutHeureStr = annee+"-"+((nbMois<10)?"0"+nbMois:nbMois)+"-"+((parseInt(jourClique)<10)?"0"+jourClique:jourClique)+"T"+((n<10)?"0"+n:n)+":"+((m<10)?"0"+m:m)+":00";
+                                                        -       var dateFinHeureStr = annee+"-"+((nbMois<10)?"0"+nbMois:nbMois)+"-"+((parseInt(jourClique)<10)?"0"+jourClique:jourClique)+"T"+((n<10)?"0"+n:n)+":"+((m<10)?"0"+m:m)+":59";
+                                                        -       var dateDebut = Date.parse(dateDebutStr);
+                                                        -       var dateFin = Date.parse(dateFinStr);
+                                                        -       var dateDebutHeure = Date.parse(dateDebutHeureStr);
+                                                        -       var dateFinHeure = Date.parse(dateFinHeureStr);
+                                                        -       if(!((dateFin < dateDebutHeure) || (dateDebut > dateFinHeure))){
+                                                        -               ressourceReservee = true;
+                                                        -       }
+                                                        - }
+                                                        if(ressourceReservee)
+                                                            td.bg-danger
+                                                        else
+                                                            td
+                                                - m++
+                                            - n++;
+                        else
+                            p.font-italic.text-center En rouge, la ressource est réservée sur la journée. En jaune, la ressource est réservée sur une partie de la journée
+                            p.font-italic.text-center Cliquer sur le numéro d'un jour pour avoir une précision des réservations du jour à la minute près.
+
+

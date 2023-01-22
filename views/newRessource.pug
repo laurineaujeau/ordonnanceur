@@ -1,0 +1,27 @@
+extends home
+
+block content
+    div.mx-3
+        form(method='POST' action='/newRessource')
+            div.form-group
+                label(for='nomRessource') Nom de la ressource:
+                input#nomRessource.form-control(type='text' name='nomRessource' required='true')
+
+            div.form-group
+                - var architectures = ["Rpi3","AMD","INTEL","ARM"];
+                label(for='architecture') Type d'architecture:
+                select#architecture.form-control(name='architecture' required='true')
+                    each architecture in architectures
+                        option=architecture
+
+            div.form-group
+                label(for='nbCoeurs') Nombre de coeurs:
+                input#nbCoeurs.form-control(type='number' min="1" name='nbCoeurs' required='true')
+
+            div.form-group
+                label(for='ram') Quantité de RAM:
+                input#ram.form-control(type='number' min="1" name='ram' required='true')
+
+            div.container.row.mx-3
+                button#annulerBouton.btn.btn-primary.mx-3(onclick="window.location.href = '/home'; return false;") Annuler
+                button#validerBouton.btn.btn-primary.mx-3(type='submit') Valider

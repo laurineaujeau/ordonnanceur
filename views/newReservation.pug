@@ -1,0 +1,23 @@
+extends home
+
+block content
+    div.mx-3
+        form(method='POST' action='')
+            div.form-group
+                label(for='nomRessource') Nom de la ressource:
+                select#nomRessource.form-control(name='nomRessource' required='true')
+                    each ressource in ressources
+                        option=ressource
+
+            div.form-group
+                label(for='debutReservation') Début de la réservation:
+                input#debutReservation.form-control(type='text' name='debutReservation' required='true' placeholder="JJ/MM/YYYY HH:MM")
+
+
+            div.form-group
+                label(for='finReservation') Fin de la réservation:
+                input#finReservation.form-control(type='text' name='finReservation' required='true' placeholder="JJ/MM/YYYY HH:MM")
+
+            div.container.row.mx-3
+                button#annulerBouton.btn.btn-primary.mx-3(onclick="window.location.href = '/home'; return false;") Annuler
+                button#validerBouton.btn.btn-primary.mx-3(type='submit') Valider
