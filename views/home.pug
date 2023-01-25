@@ -8,28 +8,27 @@ html(lang='en')
         script(type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js")
         script(nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js")
     body
-        div.container-fluid
-            nav.navbar.navbar-light.bg-light.justify-content-between
-                div
-                    span.navbar-brand.mb-0.h1 MonOrdonnanceur
+        nav.navbar.navbar-light.bg-light.justify-content-between
+            div
+                span.navbar-brand.mb-0.h1 MonOrdonnanceur
 
-                form(method='POST' action="/findUser")
-                    div.form-inline
-                        input#rechercheUtilisateur.form-control(type='text' name='rechercheUtilisateur' required='true' placeholder="Rechercher un utilisateur ..." )
-                        button.btn.btn-primary(type="submit") Rechercher
-                div
-                    if user
-                        if user.role === "administrateur"
-                            form.form-inline(method='POST' action="/logout")
-                                span.mr-3 Administrateur : #{user.name}
-                                button.btn.btn-primary(type="submit") Déconnexion
-                        else
-                            form.form-inline(method='POST' action="/logout")
-                                span.mr-3 #{user.name}
-                                button.btn.btn-primary(type="submit") Déconnexion
+            form(method='POST' action="/findUser")
+                div.form-inline
+                    input#rechercheUtilisateur.form-control(type='text' name='rechercheUtilisateur' required='true' placeholder="Rechercher un utilisateur ..." )
+                    button.btn.btn-primary(type="submit") Rechercher
+            div
+                if user
+                    if user.role === "administrateur"
+                        form.form-inline(method='POST' action="/logout")
+                            span.mr-3 Administrateur : #{user.name}
+                            button.btn.btn-primary(type="submit") Déconnexion
                     else
-                        span.mr-3 Utilisateur non identifié
-
+                        form.form-inline(method='POST' action="/logout")
+                            span.mr-3 #{user.name}
+                            button.btn.btn-primary(type="submit") Déconnexion
+                else
+                    span.mr-3 Utilisateur non identifié
+        div.container-fluid
             h1#h1.my-3= title
             if message
                 if type === "success"

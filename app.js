@@ -319,7 +319,7 @@ app.get('/newReservation', auth, function(req, res) {
         } else if(req.query.type === "debutMaintenant"){
             alertMessage = "Dates de réservation incorrectes : La date de début doit être supérieure à la date actuelle";
         } else if(req.query.type === "datesIncorrectes"){
-            alertMessage = "Dates de réservation incorrectes : Le format exigé est JJ/MM/YYYY HH:MM";
+            alertMessage = "Dates de réservation incorrectes : Le format exigé est JJ/MM/AAAA HH:MM";
         }else if(req.query.type === "utilisateurIncorrecte"){
             alertMessage = "Cet utilisateur n'existe pas";
         }
@@ -430,7 +430,7 @@ async function getReservation(nomRessource, debutReservation, finReservation) {
     let retour = "";
     let ressourceEstDisponible = true;
     if(reservations.length > 0){
-        if(dateToInt(debutReservation) && dateToInt(finReservation)){
+        if(dateToInt(debutReservation) && dateToInt(finReservation) && dateExistante(debutReservation) && dateExistante(finReservation)){
             const dateDebutReservationEnCours = dateToInt(debutReservation);
             const dateFinReservationEnCours = dateToInt(finReservation);
             for(let reservation of reservations){
@@ -487,6 +487,24 @@ function dateToInt(date){
 }
 
 /**
+ * Fonction utilitaire permettant de vérifier si une date ayant un bon format existe bien et éviter entrer des dates telles que 30 février
+ * @param date: date à vérifier
+ * @returns un booleen confirmant ou non l'existance de la date
+ */
+function dateExistante(date){
+    let retour = false;
+    let arraySplitJourHeure = date.split(" ");
+    let arraySplitJour = arraySplitJourHeure[0].split("/");
+    let annee = parseInt(arraySplitJour[2]);
+    let numero_mois = parseInt(arraySplitJour[1]);
+    let jour = parseInt(arraySplitJour[0]);
+    if(jour <= mois[numero_mois-1].nbJours+((numero_mois===1&&annee%4===0)?1:0)){//La ternaire permet de gérer l'année bissextile
+        retour = true;
+    }
+    return retour;
+}
+
+/**
  * Fonction utilitaire permettant de récupérer toutes les informations liées aux réservation d'un utilisateur donné
  * @param utilisateurConnecte : nom de l'utilisateur en question
  * @returns tableau de promises contenant les informations pour chaque réservation associée à l'utilisateur
@@ -531,7 +549,6 @@ app.get('/findUser', auth, function(req, res) {
             alertMessage = "Cet utilisateur n'existe pas";
         }
     }
-
     getAllRessources().then( (allRessources) =>{
         getAllReservations(req.query.rechercheUtilisateurName).then((allReservations)=>{
             let nombreJours = mois[req.session.numeroMoisUtilisateur].nbJours+((req.session.numeroMoisUtilisateur===1&&req.session.anneeUtilisateur%4===0)?1:0);//Permet de gérer l'année bissextile
@@ -571,7 +588,6 @@ app.get('/findUser', auth, function(req, res) {
                 ressourceClique:req?.query?.ressource,
                 message: alertMessage,
                 type:typeMessage
-
             });
         });
     });
