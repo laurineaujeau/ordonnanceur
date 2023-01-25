@@ -1,6 +1,6 @@
 {
   "name": "ordonnanceur",
-  "homepage": "https://ordonnanceur-aujeau.glitch.me/",
+  "homepage": "https://aujeau-ordonnanceur.glitch.me/",
   "version": "1.0.0",
   "description": "service qui coordonne la réservation des ressources",
   "main": "app.js",
